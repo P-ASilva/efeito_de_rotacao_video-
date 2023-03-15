@@ -17,8 +17,11 @@ def run():
 
     # Aqui, defino a largura e a altura da imagem com a qual quero trabalhar.
     # Dica: imagens menores precisam de menos processamento!!!
-    width = 320
-    height = 240
+    width = 640
+    height = 360
+
+    num = 0
+    woah = 0
 
     # Talvez o programa não consiga abrir a câmera. Verifique se há outros dispositivos acessando sua câmera!
     if not cap.isOpened():
@@ -38,22 +41,24 @@ def run():
         # Mudo o tamanho do meu frame para reduzir o processamento necessário
         # nas próximas etapas
         frame = cv.resize(frame, (width,height), interpolation =cv.INTER_AREA)
-
+        frame = cv.flip(frame, 1)
         # A variável image é um np.array com shape=(width, height, colors)
         image = np.array(frame).astype(float)/255
         
         image_ = np.zeros_like(image)
 
-        X = criar_indices(0, 240, 0, 320)
+        X = criar_indices(0, height, 0, width)
         X = np.vstack ( (X, np.ones( X.shape[1]) ) )
 
-        R = np.array([[0.77, -0.77, 0], [0.77, 0.77, 0], [0, 0,1]]) # Matriz de rotação.
+        woah += 0.01
+        #woah = np.sin(num)
+
+        R = np.array([[woah, -woah, 0], [woah, woah, 0], [0, 0,1]]) # Matriz de rotação.
+        #R = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
         Xd = R @ X
         Xd = Xd.astype(int)
         X = X.astype(int)
-
-        
 
         # Troque este código pelo seu código de filtragem de pixels
         Xd[0,:] = np.clip(Xd[0,:], 0, image_.shape[0])
