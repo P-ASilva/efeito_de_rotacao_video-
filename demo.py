@@ -1,7 +1,4 @@
 import numpy as np
-#import keyboard
-
-# Instalar a biblioteca cv2 pode ser um pouco demorado. Não deixe para ultima hora!
 import cv2 as cv
 
 def criar_indices(min_i, max_i, min_j, max_j):
@@ -13,16 +10,15 @@ def criar_indices(min_i, max_i, min_j, max_j):
     return idx
 
 def run():
+
     # Essa função abre a câmera. Depois desta linha, a luz de câmera (se seu computador tiver) deve ligar.
     cap = cv.VideoCapture(0)
 
     # Aqui, defino a largura e a altura da imagem com a qual quero trabalhar.
-    # Dica: imagens menores precisam de menos processamento!!!
+    # Também é definida a velocidade e o estado iniciais.
     width = 320
     height = 180
-
     speed = 0
-
     cmd = 'idle'
 
     # Talvez o programa não consiga abrir a câmera. Verifique se há outros dispositivos acessando sua câmera!
@@ -32,6 +28,7 @@ def run():
 
     # Esse loop é igual a um loop de jogo: ele encerra quando apertamos 'q' no teclado.
     while True:
+
         # Captura um frame da câmera
         ret, frame = cap.read()
 
@@ -42,35 +39,42 @@ def run():
 
         # Mudo o tamanho do meu frame para reduzir o processamento necessário
         # nas próximas etapas
-        frame = cv.resize(frame, (width,height), interpolation =cv.INTER_AREA)
+        frame = cv.resize(frame, (width,height), interpolation=cv.INTER_AREA)
+
+        # Inverte a imagem horizontalmente
         frame = cv.flip(frame, 1)
+
         # A variável image é um np.array com shape=(width, height, colors)
         image = np.array(frame).astype(float)/255
-        
         image_ = np.zeros_like(image)
 
-        X = criar_indices(0, height, 0, width)
-        X = np.vstack ( (X, np.ones( X.shape[1]) ) )
+        Xd = criar_indices(0, height, 0, width)
+        Xd = np.vstack ( (Xd, np.ones( Xd.shape[1]) ) )
 
+        # Troca a rotacao da imagem de acordo com o estado atual
         if cmd == 'rotate-counterclockwise':
-            speed += 1
+            speed += 0.1
         if cmd == 'rotate-clockwise': 
-            speed -= 1
+            speed -= 0.1
 
+        # Configura as matrizes de transposicao e rotacao
         T = np.array([[1, 0, -height/2], [0, 1, -width/2], [0, 0,1]])
         R = np.array([[np.cos(speed), -np.sin(speed), 0], [np.sin(speed), np.cos(speed), 0], [0, 0,1]]) # Matriz de rotação.
-        #R = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
         T2 = np.array([[1, 0, height/2], [0, 1, width/2], [0, 0,1]])
 
-        Xd = T2 @ R @ T @ X
-        Xd = Xd.astype(int)
-        X = X.astype(int)
+        # Junta as matrizes acima em uma só para aplicar a transformação
+        A = T2 @ R @ T
 
-        # Troque este código pelo seu código de filtragem de pixels
+        # Aplica a transformação
+        X = np.linalg.inv(A) @ Xd
+        X = X.astype(int)
+        Xd = Xd.astype(int)
+
+        # Tira os pixels fora da tela para evitar crashes
         Xd[0,:] = np.clip(Xd[0,:], 0, image_.shape[0])
         Xd[1,:] = np.clip(Xd[1,:], 0, image_.shape[1])
 
-        filtro = ((Xd[0,:]>= 0 ) & (Xd[0,:] < image_.shape[0]) & (Xd[1,:] < image_.shape[1]))
+        filtro = ((X[0,:]>= 0 ) & (X[0,:] < image_.shape[0]) & (X[1,:] < image_.shape[1]))
         Xd = Xd[:,filtro]
         X = X [:,filtro]
 
@@ -79,15 +83,14 @@ def run():
         # Agora, mostrar a imagem na tela!
         cv.imshow('Minha Imagem!', image_)
         
-        # Se aperto 'q', encerro o loop
-        if cv.waitKey(1) == ord('q'):
+        # INPUTS
+        if cv.waitKey(1) == ord('q'): # Sai do loop e fecha o programa
             break
-
-        if cv.waitKey(1) == ord('a'):
+        if cv.waitKey(1) == ord('a'): # Gira sentido anti-horario
             cmd = 'rotate-counterclockwise'
-        if cv.waitKey(1) == ord('s'):
+        if cv.waitKey(1) == ord('s'): # Para de girar
             cmd = 'idle'
-        if cv.waitKey(1) == ord('d'):
+        if cv.waitKey(1) == ord('d'): # Gira sentido horario
             cmd = 'rotate-clockwise'
 
 
