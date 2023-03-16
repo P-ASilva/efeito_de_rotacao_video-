@@ -1,52 +1,98 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+#import keyboard
+
+# Instalar a biblioteca cv2 pode ser um pouco demorado. Não deixe para ultima hora!
 import cv2 as cv
-import pandas as pd
 
-# Matriz RGB -> YIQ
-A = np.array( [[0.299, 0.587, 0.144], [0.5959, -0.2746, -0.3213], [0.2115, -0.5227, 0.3112]] )
+def criar_indices(min_i, max_i, min_j, max_j):
+    import itertools
+    L = list(itertools.product(range(min_i, max_i), range(min_j, max_j)))
+    idx_i = np.array([e[0] for e in L])
+    idx_j = np.array([e[1] for e in L])
+    idx = np.vstack( (idx_i, idx_j) )
+    return idx
 
-def distorcao_de_cor():
-    # --- boilerplate code
+def run():
+    # Essa função abre a câmera. Depois desta linha, a luz de câmera (se seu computador tiver) deve ligar.
     cap = cv.VideoCapture(0)
+
+    # Aqui, defino a largura e a altura da imagem com a qual quero trabalhar.
+    # Dica: imagens menores precisam de menos processamento!!!
+    width = 320
+    height = 180
+
+    speed = 0
+
+    cmd = 'idle'
+
+    # Talvez o programa não consiga abrir a câmera. Verifique se há outros dispositivos acessando sua câmera!
     if not cap.isOpened():
         print("Não consegui abrir a câmera!")
         exit()
+
+    # Esse loop é igual a um loop de jogo: ele encerra quando apertamos 'q' no teclado.
     while True:
+        # Captura um frame da câmera
         ret, frame = cap.read()
+
+        # A variável `ret` indica se conseguimos capturar um frame
         if not ret:
             print("Não consegui capturar frame!")
             break
-    # --- fim do boilerplate code
 
-        # A variável image é um np.array com shape=(height, width, colors)
-        
-
+        # Mudo o tamanho do meu frame para reduzir o processamento necessário
+        # nas próximas etapas
+        frame = cv.resize(frame, (width,height), interpolation =cv.INTER_AREA)
+        frame = cv.flip(frame, 1)
+        # A variável image é um np.array com shape=(width, height, colors)
         image = np.array(frame).astype(float)/255
-        H, W, C = image.shape
-        #print(image.shape)
-        X = image.reshape(H*W, C).T
-        # --- vamos trabalhar nesta parte
+        
+        image_ = np.zeros_like(image)
 
+        X = criar_indices(0, height, 0, width)
+        X = np.vstack ( (X, np.ones( X.shape[1]) ) )
 
-        # --- fim da parte que vamos trabalhar
-        image = X.T.reshape(H, W, C)
+        if cmd == 'rotate-counterclockwise':
+            speed += 1
+        if cmd == 'rotate-clockwise': 
+            speed -= 1
 
-    # --- mais boilerplate code
+        T = np.array([[1, 0, -height/2], [0, 1, -width/2], [0, 0,1]])
+        R = np.array([[np.cos(speed), -np.sin(speed), 0], [np.sin(speed), np.cos(speed), 0], [0, 0,1]]) # Matriz de rotação.
+        #R = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        T2 = np.array([[1, 0, height/2], [0, 1, width/2], [0, 0,1]])
+
+        Xd = T2 @ R @ T @ X
+        Xd = Xd.astype(int)
+        X = X.astype(int)
+
+        # Troque este código pelo seu código de filtragem de pixels
+        Xd[0,:] = np.clip(Xd[0,:], 0, image_.shape[0])
+        Xd[1,:] = np.clip(Xd[1,:], 0, image_.shape[1])
+
+        filtro = ((Xd[0,:]>= 0 ) & (Xd[0,:] < image_.shape[0]) & (Xd[1,:] < image_.shape[1]))
+        Xd = Xd[:,filtro]
+        X = X [:,filtro]
+
+        image_[Xd[0,:], Xd[1,:], :] = image[X[0,:], X[1,:], :]
+
         # Agora, mostrar a imagem na tela!
-        cv.imshow('Distorcao_de_cor', image)
+        cv.imshow('Minha Imagem!', image_)
         
         # Se aperto 'q', encerro o loop
-        # Use esse tipo de estrutura para implementar as outras interações!
         if cv.waitKey(1) == ord('q'):
             break
 
-        if cv.waitKey(1) == ord('w'):
-            print('lmao')
+        if cv.waitKey(1) == ord('a'):
+            cmd = 'rotate-counterclockwise'
+        if cv.waitKey(1) == ord('s'):
+            cmd = 'idle'
+        if cv.waitKey(1) == ord('d'):
+            cmd = 'rotate-clockwise'
 
+
+    # Ao sair do loop, vamos devolver cuidadosamente os recursos ao sistema!
     cap.release()
     cv.destroyAllWindows()
-    # --- fim do boilerplate code - e da função!
 
-distorcao_de_cor()
+run()
