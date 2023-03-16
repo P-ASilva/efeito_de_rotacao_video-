@@ -1,4 +1,5 @@
 import numpy as np
+#import keyboard
 
 # Instalar a biblioteca cv2 pode ser um pouco demorado. Não deixe para ultima hora!
 import cv2 as cv
@@ -20,8 +21,9 @@ def run():
     width = 640
     height = 360
 
-    num = 0
-    woah = 0
+    speed = 0
+
+    cmd = 'idle'
 
     # Talvez o programa não consiga abrir a câmera. Verifique se há outros dispositivos acessando sua câmera!
     if not cap.isOpened():
@@ -50,10 +52,12 @@ def run():
         X = criar_indices(0, height, 0, width)
         X = np.vstack ( (X, np.ones( X.shape[1]) ) )
 
-        woah += 0.01
-        #woah = np.sin(num)
+        if cmd == 'rotate-counterclockwise':
+            speed += 0.1
+        if cmd == 'rotate-clockwise': 
+            speed -= 0.1
 
-        R = np.array([[woah, -woah, 0], [woah, woah, 0], [0, 0,1]]) # Matriz de rotação.
+        R = np.array([[np.cos(speed), -np.sin(speed), 0], [np.sin(speed), np.cos(speed), 0], [0, 0,1]]) # Matriz de rotação.
         #R = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 
         Xd = R @ X
@@ -76,6 +80,14 @@ def run():
         # Se aperto 'q', encerro o loop
         if cv.waitKey(1) == ord('q'):
             break
+
+        if cv.waitKey(1) == ord('a'):
+            cmd = 'rotate-counterclockwise'
+        if cv.waitKey(1) == ord('s'):
+            cmd = 'idle'
+        if cv.waitKey(1) == ord('d'):
+            cmd = 'rotate-clockwise'
+
 
     # Ao sair do loop, vamos devolver cuidadosamente os recursos ao sistema!
     cap.release()
