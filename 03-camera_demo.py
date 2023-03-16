@@ -57,10 +57,12 @@ def run():
         if cmd == 'rotate-clockwise': 
             speed -= 0.1
 
+        T = np.array([[1, 0, -height/2], [0, 1, -width/2], [0, 0,1]])
         R = np.array([[np.cos(speed), -np.sin(speed), 0], [np.sin(speed), np.cos(speed), 0], [0, 0,1]]) # Matriz de rotação.
         #R = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+        T2 = np.array([[1, 0, height/2], [0, 1, width/2], [0, 0,1]])
 
-        Xd = R @ X
+        Xd = T2 @ R @ T @ X
         Xd = Xd.astype(int)
         X = X.astype(int)
 
