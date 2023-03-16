@@ -4,8 +4,6 @@
 
 Tirar artifacting (consultar notebook aula 3)
 
-Passar tudo para o demo.py
-
 Limpar e comentar código
 
 Escrever o README.md (checar rubrica)
