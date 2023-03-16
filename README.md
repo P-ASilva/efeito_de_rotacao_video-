@@ -2,4 +2,12 @@
 
 - TASKS :
 
-Descobrir como funcina pra alterar imagens na biblioteca com matrizes.
+Tirar artifacting (consultar notebook aula 3)
+
+Passar tudo para o demo.py
+
+Limpar e comentar código
+
+Escrever o README.md (checar rubrica)
+
+Tentar fazer até o requisito A, depois a gente vê se ta com vontade de seguir adiante

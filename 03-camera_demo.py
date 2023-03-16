@@ -18,8 +18,8 @@ def run():
 
     # Aqui, defino a largura e a altura da imagem com a qual quero trabalhar.
     # Dica: imagens menores precisam de menos processamento!!!
-    width = 640
-    height = 360
+    width = 320
+    height = 180
 
     speed = 0
 
