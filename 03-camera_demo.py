@@ -53,9 +53,9 @@ def run():
         X = np.vstack ( (X, np.ones( X.shape[1]) ) )
 
         if cmd == 'rotate-counterclockwise':
-            speed += 0.1
+            speed += 1
         if cmd == 'rotate-clockwise': 
-            speed -= 0.1
+            speed -= 1
 
         T = np.array([[1, 0, -height/2], [0, 1, -width/2], [0, 0,1]])
         R = np.array([[np.cos(speed), -np.sin(speed), 0], [np.sin(speed), np.cos(speed), 0], [0, 0,1]]) # Matriz de rotação.
