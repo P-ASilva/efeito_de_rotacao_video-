@@ -34,9 +34,9 @@ Tentar fazer até o requisito A, depois a gente vê se ta com vontade de seguir 
 
 Para inicializar a camera, apenas rode o arquivo demo.py no sua IDE de preferência, uma vez com a cmera aberta, você pode usar os seguintes comandos no teclado:
 
-A - Rotacionar a imagem pno sentido anti-horário.
+A - Rotacionar a imagem no sentido anti-horário.
 
-D - Rotacionar a imagem no sentido anti_horário.
+D - Rotacionar a imagem no sentido anti-horário.
 
 S - Parar a rotação.
 
@@ -62,9 +62,10 @@ T =
 R =
 \begin{bmatrix}
 
-cos(speed), -np.sin(speed), 0 \\
+\cos(speed), -\
+\sin(speed), 0 \\
 
-np.sin(speed), np.cos(speed), 0 \\
+\sin(speed), \cos(speed), 0 \\
 
 0, 0,1
 
@@ -72,40 +73,74 @@ np.sin(speed), np.cos(speed), 0 \\
 T2 =
 \begin{bmatrix}
 
-1, 0, height/2 \\
+1, 0, H/2 \\
 
-0, 1, width/2 \\
+0, 1, W/2 \\
 
 0, 0,1
 
 \end{bmatrix}
 
 $$
+Onde a matriz T, faz uma translação da matriz de imagem para o centro da tela.
+$$
+T =
 
-A matriz T, faz uma transposição da matriz de imagem para o centro da tela.
+\begin{bmatrix}
 
-Já a matriz R faz com que a matriz imagem rotacione em torno de seu canto superior esquerdo. Esse é o motivo pelo qual devemos transpor a matriz inicialmente, sabendo que não há outra forma direta de rotacioná-la em torno de seu centro. 
+1, 0, -H/2 \\
 
-A variável speed, atualizada com o tempo, muda o ângulo de rotação da matriz, o que faz com que ela gire.
+0, 1, -W/2 \\
 
-Finalmente, a matriz T2 faz com que a imagem seja transposta de volta para sua posição inicial, "consertando" assim seu posicionamento para o centro da tela, dado que a rotação a desloca para baixo e para a direita.
+0, 0 , 1
 
-Juntamos essas matrizes na forma de  A = T2 @ R @ T e pré-multiplicamos A^-1 por Xd e armazenamos como X, com Xd e X sendo usados para se representar a imagem dentro do código, 
-
-Adicionalmente, colocamos um filtro para que a matriz não representase pontos fora do domínio da imagem e aplicamos o conceito de remoção de artefatos visto em aula, como elaborado abaixo :
-
-### Retirando artefatos da imagem
-
-Talvez, ao realizar uma rotação, você veja a sua imagem resultante cheia de pontinhos. Isso acontece porque nem todo ponto na imagem de destino tem um correspondente na imagem de origem. Então, podemos solucionar isso usando a seguinte ideia:
+\end{bmatrix}
 
 $$
-X_d = A X_o
-$$
 
-Os pixels de $X_o$ estão bem organizados em uma grade, mas os pixels de $X_d$ não, e é isso que leva ao surgimento desses pontinhos pretos no meio da imagem. Porém, nada impede que façamos os pixels de $X_d$ como uma grade, e então encontremos os pixels em $X_o$ correspondentes usando a transformação inversa:
+A matriz R faz com que a matriz imagem rotacione em torno de seu canto superior esquerdo. Esse é o motivo pelo qual devemos transpor a matriz inicialmente, sabendo que não há outra forma direta de rotacioná-la em torno de seu centro. 
 
 $$
-X_o = A^{-1} X_d
+R =
+\begin{bmatrix}
+
+\cos(speed), -\
+\sin(speed), 0 \\
+
+\sin(speed), \cos(speed), 0 \\
+
+0, 0,1
+
+\end{bmatrix}
 $$
 
-Referência : Notebook 3 de Algebra Linear, explicação e exemplo elaborados pelo Professor Tiago, 2023.
+E finalmente, a matriz T2 faz com que a imagem seja transladada de volta para sua posição inicial, "consertando" assim seu posicionamento para o centro da tela, dado que a rotação a desloca para baixo e para a direita.
+$$
+\begin{bmatrix}
+
+1, 0, H/2 \\
+
+0, 1, W/2 \\
+
+0, 0,1
+
+\end{bmatrix}
+$$
+
+Descritivo das variáveis :
+
+- A variável speed, atualizada com o tempo, muda o ângulo de rotação da matriz, o que faz com que ela gire.
+- As variaveis W e H representam a largura e altura respectivamente.
+
+
+Juntamos essas matrizes na seguinte forma, para facilitar na hora do calculo :  
+
+$$
+A = T2 * R * T 
+$$
+
+E a aplicamos no seguinte calculo com X, que prepresenta um mapeamento dos pixeis da imagem.
+
+$$
+X = inv(A) * Xd
+$$
