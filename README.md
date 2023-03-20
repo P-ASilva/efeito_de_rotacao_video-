@@ -1,18 +1,8 @@
 # efeito_de_rotacao_video-
 
-Pedro Antônio SIlva e ________
+Pedro Antônio Silva e Gustavo Lindenberg Pacheco
 
 https://github.com/P-ASilva/efeito_de_rotacao_video-.git
-
-- TASKS :
-
-Tirar artifacting (consultar notebook aula 3)
-
-Limpar e comentar código
-
-Escrever o README.md (checar rubrica)
-
-Tentar fazer até o requisito A, depois a gente vê se ta com vontade de seguir adiante
 
 ## Como instalar e executar
 
